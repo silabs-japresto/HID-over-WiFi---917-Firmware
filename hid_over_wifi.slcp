@@ -1,0 +1,290 @@
+# Silicon Labs Project Configuration Tools: slcp, v0, Component selection file.
+project_name: hid_over_wifi
+label: hid_over_wifi
+description: |
+  This application demonstrates the usage of an empty configuration that can be used as a starting point to add components and functionality.
+category: Example|Platform
+filter:
+- name: Device Type
+  value:
+  - SoC
+- name: MCU
+  value:
+  - 32-bit MCU
+- name: Project Difficulty
+  value:
+  - Beginner
+package: platform_siwx91x_app
+quality: production
+readme:
+- path: readme.md
+source:
+- path: app.cpp
+include:
+- path: .
+  file_list:
+  - path: app.h
+sdk:
+  vendor: silabs
+  id: simplicity_sdk
+  version: 2026.6.1
+toolchain_settings:
+- value: -Wall -Werror -Wno-error=deprecated-declarations
+  option: gcc_compiler_option
+- value: -Wall -Werror -Wno-error=deprecated-declarations
+  option: llvm_compiler_option
+component:
+- package: simplicity_sdk
+  vendor: silabs
+  id: brd4002a
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_main
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: SIWG917M111MGTBA
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: brd4338a
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: si91x_memory_default_config
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: syscalls
+autoselected_components:
+- package: simplicity_sdk
+  vendor: silabs
+  id: agents_md
+- package: simplicity_sdk
+  vendor: silabs
+  id: cmsis_core
+- package: simplicity_sdk
+  vendor: silabs
+  id: code_classification
+- package: simplicity_sdk
+  vendor: silabs
+  id: component_catalog
+- package: simplicity_sdk
+  vendor: silabs
+  id: event_handler
+- package: simplicity_sdk
+  vendor: silabs
+  id: log_none
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_assert
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_common
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_main_init
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_main_memory_init
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_main_process_action
+- package: simplicity_sdk
+  vendor: silabs
+  id: status
+- package: simplicity_sdk
+  vendor: silabs
+  id: toolchain_variant_arm
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: board_configuration_headers
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: brd4338a_config
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: cmsis_common_driver
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: cmsis_driver_headers
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: cmsis_peripheral_headers
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: cmsis_udma
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: cmsis_usart
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: cmsis_usart_driver
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: external_flash_none
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: external_psram_none
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: freertos_config
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: opn_config
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: romdriver_clks
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: romdriver_crc
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: romdriver_egpio
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: romdriver_headers
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: romdriver_packing
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: romdriver_romtable
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: romdriver_romtable_headers
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: romdriver_udma
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: romdriver_udma_wrapper
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: romdriver_ulpss
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: rsilib_adc
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: rsilib_aux_reference_volt_config
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: rsilib_board
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: rsilib_chip
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: rsilib_clock_update
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: rsilib_crc
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: rsilib_dac
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: rsilib_egpio
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: rsilib_headers
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: rsilib_opamp
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: rsilib_udma
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: rsilib_udma_wrapper
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: rsilib_usart
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: rsilib_userconfig
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: si91x_common_flash
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: si91x_debug
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: si91x_device_init_nvic
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: si91x_log_none
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: si91x_mem_config_1
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: si91x_stack_size_configuration
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: sl_adc
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: sl_bjt_temperature_sensor
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: sl_clock_manager
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: sl_dma
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: sl_si91x_agents_md
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: sl_si91x_mcu
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: systemlevel_bod
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: systemlevel_headers
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: systemlevel_ipmu
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: systemlevel_pll
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: systemlevel_reg_spi
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: systemlevel_rtc
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: systemlevel_temp_sensor
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: systemlevel_time_period
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: systemlevel_ulpss_clk
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: udma_linker_config
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: wiseconnect_toolchain_gcc_standard
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: wiseconnect_toolchain_plugin
+define:
+- name: SLI_SI91X_EMPTY_PROJECT
+library:
+- system: stdc++
+ui_hints:
+  highlight:
+  - path: readme.md
+    focus: true
+sdk_extension:
+- vendor: silabs
+  id: wiseconnect3_sdk
+  version: 4.1.1
+post_build:
+- path: hid_over_wifi.slpb
+  profile: wiseconnect_soc
+

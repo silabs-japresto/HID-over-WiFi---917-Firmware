@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ASCII"?>
+<model:MDescriptors xmlns:model="http://www.silabs.com/ss/Studio.ecore">
+  <descriptors name="hid_over_wifi">
+    <properties key="projectCommon.sdkId" value="com.silabs.sdk.stack.simplicity_sdk:2026.6.1._-17050700722374425997"/>
+    <properties key="universalConfig.relativeWorkspacePath" value="../hid_over_wifi.slcw"/>
+    <properties key="universalConfig.generationDirectory" value=""/>
+    <properties key="universalConfig.toolchainCompatibility" value="iar llvm gcc"/>
+    <properties key="projectCommon.overwriteCopiedSources" value="false"/>
+    <properties key="projectCommon.boardIds" value="brd4002a:0.0.0.A07 brd4338a:0.0.0.A12"/>
+    <properties key="projectCommon.kitId" value=""/>
+    <properties key="projectCommon.partId" value="mcu.arm.wfm.siwg917m111mgtba"/>
+    <properties key="projectCommon.toolchainId" value="com.silabs.ss.framework.project.core.noToolChain:0.0.0"/>
+    <properties key="universalConfig.projectTypeIds" value="visual-studio-code"/>
+    <properties key="projectCommon.importModeId" value="COPY"/>
+    <properties key="universalConfig.filteredToolchains" value="iar llvm gcc"/>
+    <properties key="universalConfig.ucProjectCacheState" value="-585979478"/>
+    <properties key="universalConfig.compSelProjInstanceId" value="1791997312196"/>
+  </descriptors>
+</model:MDescriptors>
