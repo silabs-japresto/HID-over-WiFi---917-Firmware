@@ -1,0 +1,15 @@
+# directories
+autogen/
+build/
+cmake_gcc/
+patches/
+trashed_modified_files/
+simplicity_sdk_*/
+.vscode/
+
+# files
+vscode.conf
+vscsolution.conf
+.projectlinkstore
+.uceditor
+*.bak
