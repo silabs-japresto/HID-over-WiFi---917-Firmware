@@ -6,6 +6,7 @@ patches/
 trashed_modified_files/
 simplicity_sdk_*/
 .vscode/
+.codex/
 
 # files
 vscode.conf
