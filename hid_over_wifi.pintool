@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="ASCII"?>
-<device:XMLDevice xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:device="http://www.silabs.com/ss/hwconfig/document/device.ecore" name="pin_tool.siwg917m111mgtba" partId="mcu.arm.wfm.siwg917m111mgtba" contextId="com.silabs.sdk.stack.simplicity_sdk:2026.6.1._-17050700722374425997">
+<device:XMLDevice xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:device="http://www.silabs.com/ss/hwconfig/document/device.ecore" name="pin_tool.siwg917m111mgtba" partId="mcu.arm.wfm.siwg917m111mgtba" contextId="com.silabs.sdk.stack.simplicity_sdk:2026.6.1._-1705070072-4186388080">
   <mode name="DefaultMode">
     <property object="DefaultMode" propertyId="mode.diagramLocation" value="100, 100"/>
+    <property object="GPIO_11" propertyId="ABModule.selectedRequirement" value="gpio%T%SL_SI91X_BUTTON_1%T%sl_si91x_button_init_btn1_config.h"/>
+    <property object="GPIO_11" propertyId="pin.reserve" value="Reserved"/>
+    <property object="UULP_VBAT_GPIO_2" propertyId="ABModule.selectedRequirement" value="gpio%T%SL_SI91X_BUTTON_0%T%sl_si91x_button_init_btn0_config.h"/>
+    <property object="UULP_VBAT_GPIO_2" propertyId="pin.reserve" value="Reserved"/>
   </mode>
   <modeTransition>
     <property object="RESET &#x2192; DefaultMode" propertyId="modeTransition.source" value="RESET"/>

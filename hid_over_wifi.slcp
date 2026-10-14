@@ -20,10 +20,13 @@ readme:
 - path: readme.md
 source:
 - path: app.cpp
+- path: ble_provision.c
 include:
 - path: .
   file_list:
   - path: app.h
+  - path: ble_provision.h
+  - path: ble_config.h
 sdk:
   vendor: silabs
   id: simplicity_sdk
@@ -46,6 +49,39 @@ component:
 - package: wiseconnect3_sdk
   vendor: silabs
   id: brd4338a
+- package: simplicity_sdk
+  vendor: silabs
+  id: freertos
+- package: simplicity_sdk
+  vendor: silabs
+  id: freertos_heap_4
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: wiseconnect_common
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: wifi
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: ble
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: wifi_resources
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: network_manager
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: nvm3_network_config_manager
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: sl_si91x_asynchronous_socket
+- package: wiseconnect3_sdk
+  vendor: silabs
+  id: sl_si91x_button_917
+  instance:
+  - btn0
+  - btn1
 - package: wiseconnect3_sdk
   vendor: silabs
   id: si91x_memory_default_config

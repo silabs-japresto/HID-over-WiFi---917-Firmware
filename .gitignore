@@ -14,3 +14,4 @@ vscsolution.conf
 .projectlinkstore
 .uceditor
 *.bak
+hid_wifi_local.h
