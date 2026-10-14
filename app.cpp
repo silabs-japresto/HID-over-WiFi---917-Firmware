@@ -19,7 +19,8 @@
 #include "ble_provision.h"
 
 #include <cstring>
-#include "hid_wifi_local.h"
+#include <cstdio>
+#include <cerrno>
 extern "C" {
 #include "cmsis_os2.h"
 #include "sl_net.h"
@@ -30,10 +31,6 @@ extern "C" {
 #include "sl_wifi.h"
 }
 
-#ifndef HID_HOST_PORT
-#define HID_HOST_PORT 5004
-#endif
-
 extern "C" {
 volatile uint32_t hid_radio_init_status = 0xffffffff;
 }
@@ -43,7 +40,139 @@ constexpr uint8_t kVersion = 1;
 constexpr uint32_t kPollMs = 5;
 constexpr uint32_t kRefreshMs = 50;
 constexpr uint32_t kRetryMs = 1000;
+constexpr uint16_t kDiscoveryPort = 5005;
+constexpr uint32_t kHostLeaseMs = 4000;
+constexpr uint8_t kHostMagic[] = {'H', 'W', 'H', 1};
+constexpr uint8_t kDiscoveryQuery[] = {'H', 'W', '?', 1};
 uint8_t packet[6] = {'H', 'W', kVersion, 0, 0, 0};
+osMessageQueueId_t discovery_queue;
+struct DiscoveryMessage {
+  sockaddr_in source;
+  uint8_t data[8];
+};
+bool discovery_network_ready = false;
+int discovery_socket = -1;
+uint32_t last_discovery_open = 0;
+uint32_t last_query = 0;
+sockaddr_in discovered_host = {};
+uint32_t host_seen = 0;
+bool host_selected = false;
+
+uint32_t milliseconds()
+{
+  return static_cast<uint32_t>(static_cast<uint64_t>(osKernelGetTickCount()) * 1000
+                               / osKernelGetTickFreq());
+}
+
+void discovery_network(bool ready)
+{
+  if (discovery_socket >= 0) {
+    sl_si91x_shutdown(discovery_socket, 0);
+    discovery_socket = -1;
+  }
+  osMessageQueueReset(discovery_queue);
+  discovery_network_ready = ready;
+  host_selected = false;
+  last_discovery_open = milliseconds() - kRetryMs;
+}
+
+bool current_host(sockaddr_in &host)
+{
+  if (!host_selected || milliseconds() - host_seen >= kHostLeaseMs) {
+    return false;
+  }
+  host = discovered_host;
+  return true;
+}
+
+void discovery_receive(uint32_t, uint8_t *data, uint32_t size,
+                       const sl_si91x_socket_metadata_t *metadata)
+{
+  if (size != 8 || metadata == nullptr || metadata->ip_version != 4
+      || std::memcmp(data, kHostMagic, sizeof(kHostMagic)) != 0) {
+    return;
+  }
+  DiscoveryMessage message = {};
+  message.source.sin_family = AF_INET;
+  message.source.sin_port = metadata->dest_port;
+  std::memcpy(&message.source.sin_addr.s_addr, metadata->dest_ip_addr.ipv4_address, 4);
+  std::memcpy(message.data, data, sizeof(message.data));
+  // The callback runs on the driver's receive task: never block it.
+  osMessageQueuePut(discovery_queue, &message, 0, 0);
+}
+
+void discover_hosts()
+{
+  if (!discovery_network_ready) {
+    return;
+  }
+  const uint32_t now = milliseconds();
+  if (host_selected && now - host_seen >= kHostLeaseMs) {
+    host_selected = false;
+    std::printf("HID host expired; searching again\n");
+  }
+  if (discovery_socket < 0 && now - last_discovery_open >= kRetryMs) {
+    last_discovery_open = now;
+    discovery_socket = sl_si91x_socket_async(AF_INET, SOCK_DGRAM, IPPROTO_UDP, discovery_receive);
+    if (discovery_socket >= 0) {
+      sockaddr_in local = {};
+      local.sin_family = AF_INET;
+      // Si91x asynchronous socket ports use host byte order.
+      local.sin_port = kDiscoveryPort;
+      if (sl_si91x_bind(discovery_socket, reinterpret_cast<sockaddr *>(&local), sizeof(local)) < 0) {
+        std::printf("HID discovery bind failed\n");
+        sl_si91x_shutdown(discovery_socket, 0);
+        discovery_socket = -1;
+      } else {
+        std::printf("HID host discovery listening on UDP %u\n", kDiscoveryPort);
+        last_query = now - kRetryMs;
+      }
+    }
+  }
+  if (discovery_socket < 0) {
+    return;
+  }
+  if ((!host_selected || now - host_seen >= 1500) && now - last_query >= kRetryMs) {
+    sockaddr_in probe = discovered_host;
+    probe.sin_family = AF_INET;
+    if (!host_selected) {
+      sl_net_inet_addr("255.255.255.255", &probe.sin_addr.s_addr);
+    }
+    probe.sin_port = kDiscoveryPort;
+    if (sl_si91x_sendto(discovery_socket, kDiscoveryQuery, sizeof(kDiscoveryQuery), 0,
+                        reinterpret_cast<sockaddr *>(&probe), sizeof(probe)) < 0) {
+      std::printf("HID discovery probe failed: %d\n", errno);
+    }
+    last_query = now;
+  }
+  // Bound queue work and never wait on network reads in the button loop.
+  for (unsigned int i = 0; i < 4; ++i) {
+    DiscoveryMessage message;
+    if (osMessageQueueGet(discovery_queue, &message, nullptr, 0) != osOK) {
+      break;
+    }
+    const uint8_t *buffer = message.data;
+    const sockaddr_in &source = message.source;
+    if (buffer[6] != 0 || buffer[7] != 0 || source.sin_port != kDiscoveryPort
+        || source.sin_addr.s_addr == 0) {
+      continue;
+    }
+    const uint16_t port = static_cast<uint16_t>((buffer[4] << 8) | buffer[5]);
+    if (port == 0) {
+      continue;
+    }
+    if (!host_selected || (source.sin_addr.s_addr == discovered_host.sin_addr.s_addr
+                           && port == discovered_host.sin_port)) {
+      if (!host_selected) {
+        std::printf("HID host discovered on UDP port %u\n", port);
+      }
+      discovered_host = source;
+      discovered_host.sin_port = port;
+      host_seen = milliseconds();
+      host_selected = true;
+    }
+  }
+}
 
 uint8_t button_state()
 {
@@ -105,17 +234,29 @@ bool save_profile(const hid_wifi_credentials_t &credentials)
 
 bool connect_wifi()
 {
-  return sl_net_up(SL_NET_WIFI_CLIENT_INTERFACE, SL_NET_DEFAULT_WIFI_CLIENT_PROFILE_ID) == SL_STATUS_OK;
+  const sl_status_t status = sl_net_up(SL_NET_WIFI_CLIENT_INTERFACE, SL_NET_DEFAULT_WIFI_CLIENT_PROFILE_ID);
+  std::printf("Wi-Fi connection status: 0x%08lx\n", static_cast<unsigned long>(status));
+  sl_net_wifi_client_profile_t profile = {};
+  if (status == SL_STATUS_OK
+      && sl_net_get_profile(SL_NET_WIFI_CLIENT_INTERFACE, SL_NET_DEFAULT_WIFI_CLIENT_PROFILE_ID, &profile) == SL_STATUS_OK) {
+    const uint8_t *ip = profile.ip.ip.v4.ip_address.bytes;
+    std::printf("Wi-Fi IPv4 address: %u.%u.%u.%u\n", ip[0], ip[1], ip[2], ip[3]);
+    const sl_wifi_groupcast_filter_config_t groupcast = {};
+    const sl_status_t filter_status = sl_wifi_set_groupcast_filter_config(&groupcast);
+    std::printf("Wi-Fi groupcast filter status: 0x%08lx\n", static_cast<unsigned long>(filter_status));
+  }
+  return status == SL_STATUS_OK;
 }
 
 void run(void *)
 {
   if (!initialize_radio()) {
+    std::printf("Radio initialization failed: 0x%08lx\n", static_cast<unsigned long>(hid_radio_init_status));
     for (;;) {
       osDelay(kRetryMs);
     }
   }
-  ble_provision_start();
+  std::printf("BLE provisioning startup: %s\n", ble_provision_start() ? "ready" : "failed");
 
   sl_net_wifi_client_profile_t saved = {};
   bool connected = false;
@@ -124,22 +265,21 @@ void run(void *)
       && saved.config.ssid.length > 0) {
     ble_provision_set_status(1);
     connected = connect_wifi();
+    std::printf("Saved Wi-Fi profile connection: %s\n", connected ? "connected" : "failed");
     ble_provision_set_status(connected ? 2 : 3);
   }
 
-  sockaddr_in host = {};
-  host.sin_family = AF_INET;
-  host.sin_port = HID_HOST_PORT;
-  if (sl_net_inet_addr(HID_HOST_IP, &host.sin_addr.s_addr) != SL_STATUS_OK) {
-    return;
-  }
+  discovery_network(connected);
 
   int socket = -1;
+  sockaddr_in host = {};
+  bool had_host = false;
   uint8_t last_state = 0xff;
   uint32_t last_sent = 0;
   for (;;) {
     hid_wifi_credentials_t credentials = {};
     if (ble_provision_take(&credentials)) {
+      discovery_network(false);
       if (connected) {
         sl_net_down(SL_NET_WIFI_CLIENT_INTERFACE);
         connected = false;
@@ -150,14 +290,29 @@ void run(void *)
       }
       ble_provision_set_status(1);
       connected = save_profile(credentials) && connect_wifi();
+      std::printf("Provisioned Wi-Fi profile connection: %s\n", connected ? "connected" : "failed");
       std::memset(&credentials, 0, sizeof(credentials));
       ble_provision_set_status(connected ? 2 : 3);
+      discovery_network(connected);
       last_state = 0xff;
     }
     if (!connected) {
       osDelay(kPollMs);
       continue;
     }
+    discover_hosts();
+    sockaddr_in selected = {};
+    if (!current_host(selected)) {
+      had_host = false;
+      osDelay(kPollMs);
+      continue;
+    }
+    if (!had_host || host.sin_addr.s_addr != selected.sin_addr.s_addr
+        || host.sin_port != selected.sin_port) {
+      host = selected;
+      last_state = 0xff;
+    }
+    had_host = true;
     if (socket < 0) {
       socket = sl_si91x_socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
       if (socket < 0) {
@@ -165,7 +320,7 @@ void run(void *)
         continue;
       }
     }
-    const uint32_t now = osKernelGetTickCount();
+    const uint32_t now = milliseconds();
     const uint8_t state = button_state();
     if (state != last_state || now - last_sent >= kRefreshMs) {
       packet[3]++;
@@ -188,6 +343,10 @@ void run(void *)
 
 extern "C" void app_init(void)
 {
+  discovery_queue = osMessageQueueNew(4, sizeof(DiscoveryMessage), nullptr);
+  if (discovery_queue == nullptr) {
+    return;
+  }
   static osThreadAttr_t attributes = {};
   attributes.name = "hid_wifi";
   attributes.stack_size = 4096;
