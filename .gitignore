@@ -7,6 +7,7 @@ trashed_modified_files/
 simplicity_sdk_*/
 .vscode/
 .codex/
+.claude/
 
 # files
 vscode.conf

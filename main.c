@@ -32,10 +32,12 @@
 
 int main(void)
 {
-  // Called from the FreeRTOS start task by main_retarget.c.
-  sl_main_second_stage_init();
-  app_init();
-  while (sl_main_start_task_should_continue()) {
-    app_process_action();
-  }
+    // Called from the FreeRTOS start task by main_retarget.c.
+    sl_main_second_stage_init();
+    app_init();
+
+    while (sl_main_start_task_should_continue())
+    {
+        app_process_action();
+    }
 }

@@ -4,12 +4,14 @@
 #include <stdint.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-typedef struct {
-  char ssid[33];
-  char password[65];
+typedef struct
+{
+    char ssid[33];
+    char password[65];
 } hid_wifi_credentials_t;
 
 // Call after sl_net_init() has booted the radio in Wi-Fi/BLE coexistence mode.
